@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+
+*{
+    box-sizing: border-box;
+    -webkit-text-size-adjust: 100%;
+    margin-top: 0;
+    margin-right: 0;
+    margin-left: 0;
+    padding: 4px;
+}
+
+body{
+    padding: 6px;
+    width: 100%;
+}
