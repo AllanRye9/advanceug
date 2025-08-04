@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 async function fetchAgricData() {
   try {
-    const resp = await fetch("https://jsonplaceholder.typicode.com/comments");
+    const resp = await fetch("https://advanceug.onrender.com/api/data");
     if (!resp.ok) {
       throw new Error(`HTTP error! status: ${resp.status}`);
     }
@@ -47,16 +47,13 @@ export default function Agric() {
 
   return (
     <div>
-      <h1>Comments</h1>
-      {data.map((item) => (
-        <div key={item.id}>
-          <p><strong>Post ID:</strong> {item.postId}</p>
-          <p><strong>Comment ID:</strong> {item.id}</p>
-          <p><strong>Name:</strong> {item.name}</p>
-          <p><strong>Email:</strong> {item.email}</p>
-          <p><br /></p>
-        </div>
-      ))}
+      <h1>Agriculture</h1>
+      <p><strong>Name:</strong> {data.name}</p>
+      <p><strong>Description:</strong> {data.description}</p>
+      <p><strong>Value:</strong> {data.value}</p>
+      <p><strong>Timestamp:</strong> {data.timestamp}</p>
+      <p><strong>Status:</strong> {data.status}</p>
+      <p><br /></p>
     </div>
   );
 }
