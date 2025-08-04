@@ -1,0 +1,1 @@
+cd backend/ && npm start || echo "Failed to start backend server." && exit 1;

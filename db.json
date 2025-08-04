@@ -1,0 +1,9 @@
+{
+    "data": {
+        "name": "Agriculture",
+        "description": "A subject related to the study of agriculture.",
+        "value": 100,
+        "timestamp": "2023-10-01T12:00:00Z",
+        "status": "active"
+    }
+}

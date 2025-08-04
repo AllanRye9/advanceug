@@ -1,0 +1,1 @@
+cd advanceug/ && npm run dev || echo "Failed to start frontend server." && exit 1;

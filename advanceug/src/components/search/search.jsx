@@ -10,6 +10,7 @@ export default function Search() {
       <button className="w-full sm:w-auto bg-white hover:bg-blue-500 text-gray-800 hover:text-white border-2 border-gray-500 rounded-full px-6 py-2 transition">
         Search
       </button>
+      
     </div>
   );
 }

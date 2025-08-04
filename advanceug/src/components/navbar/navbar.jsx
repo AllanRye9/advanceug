@@ -25,13 +25,13 @@ export default function NavBar() {
           <div className="flex justify-between h-16">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
-              <a href="#" className="text-xl font-bold text-blue-600">Advaceug</a>
+              <a href="/" className="text-xl font-bold text-blue-600">Advaceug</a>
             </div>
 
             {/* Menu (Desktop) */}
             <div className="hidden md:flex md:items-center space-x-4 p-{4}">
-              <a href="#" className="text-gray-700 hover:text-blue-600">Home</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600">About</a>
+              <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
+              <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
               <a href="#" className="text-gray-700 hover:text-blue-600">Services</a>
               <a href="#" className="text-gray-700 hover:text-blue-600">Contact</a>
             </div>
@@ -50,8 +50,8 @@ export default function NavBar() {
 
         {/* Mobile Menu */}
         <div id="mobile-menu" className="md:hidden hidden px-4 pb-4">
-          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">Home</a>
-          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">About</a>
+          <a href="/" className="block py-2 text-gray-700 hover:text-blue-600">Home</a>
+          <a href="/about" className="block py-2 text-gray-700 hover:text-blue-600">About</a>
           <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">Services</a>
           <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">Contact</a>
         </div>

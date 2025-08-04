@@ -17,7 +17,7 @@ export default function Footer() {
         <div>
           <h3 className="text-lg font-semibold mb-2">Quick Links</h3>
           <ul className="space-y-1 text-sm text-gray-300">
-            <li><a href="#" className="hover:underline">Home</a></li>
+            <li><a href="/" className="hover:underline">Home</a></li>
             <li><a href="#" className="hover:underline">Resources</a></li>
             <li><a href="#" className="hover:underline">Contact</a></li>
             <li><a href="#" className="hover:underline">Support</a></li>
