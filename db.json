@@ -1,9 +1,32 @@
 {
-    "data": {
-        "name": "Agriculture",
-        "description": "A subject related to the study of agriculture.",
-        "value": 100,
-        "timestamp": "2023-10-01T12:00:00Z",
-        "status": "active"
-    }
+    "paper1": [
+        {
+            "id": 1,
+            "name": "Agriculture Paper 1",
+            "description": "This is the first paper of the Agriculture subject.",
+            "value": 42,
+            "timestamp": "2025-08-01T12:00:00Z",
+            "status": "active"
+        }
+    ],
+    "paper2": [
+        {
+            "id": 2,
+            "name": "Agriculture Paper 2",
+            "description": "This is the second paper of the Agriculture subject.",
+            "value": 36,
+            "timestamp": "2025-08-01T12:00:00Z",
+            "status": "active"
+        }
+    ],
+    "paper3": [
+        {
+            "id": 3,
+            "name": "Agriculture Paper 3",
+            "description": "This is the third paper of the Agriculture subject.",
+            "value": 28,
+            "timestamp": "2025-08-01T12:00:00Z",
+            "status": "active"
+        }
+    ]
 }

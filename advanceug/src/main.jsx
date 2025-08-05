@@ -22,11 +22,10 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
     <NavBar />
     <Search />
-    <Content />
         <Routes>
-          <Route path='/' element={<OrganizeContent />} />
+          <Route path='/' element={ <><Content /> <OrganizeContent /> </>} />
           <Route path="/uace" element={<Uace />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={ <><Content /> <About /> </>} />
           <Route path="/agricContent" element={<AgricContent />} />
           <Route path="/agricContent2" element={<AgricContent2 />} />
           <Route path="/agricContent3" element={<AgricContent3 />} />
