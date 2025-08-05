@@ -13,6 +13,8 @@ import NoPage from './components/pages/noPage/noPage.jsx'
 import About from './components/pages/about/about.jsx'
 import Agric from './components/pages/uaceSubjects/agric/agric.jsx'
 import AgricContent from './components/pages/uaceSubjects/agric/agricContent.jsx'
+import AgricContent2 from './components/pages/uaceSubjects/agric/agricContent2.jsx'
+import AgricContent3 from './components/pages/uaceSubjects/agric/agricContent3.jsx'
 
 
 createRoot(document.getElementById('root')).render(
@@ -26,8 +28,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="/uace" element={<Uace />} />
           <Route path="/about" element={<About />} />
           <Route path="/agricContent" element={<AgricContent />} />
-          <Route path="/agricContent2" element={<AgricContent />} />
-          <Route path="/agricContent3" element={<AgricContent />} />
+          <Route path="/agricContent2" element={<AgricContent2 />} />
+          <Route path="/agricContent3" element={<AgricContent3 />} />
           <Route path="*" element={<NoPage />} />
         </Routes>
       <Footer />

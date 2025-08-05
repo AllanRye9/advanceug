@@ -48,11 +48,19 @@ export default function AgricContent() {
   return (
     <div>
       <h1>Agriculture</h1>
-      <p><strong>Name:</strong> {data.name}</p>
-      <p><strong>Description:</strong> {data.description}</p>
-      <p><strong>Value:</strong> {data.value}</p>
-      <p><strong>Timestamp:</strong> {data.timestamp}</p>
-      <p><strong>Status:</strong> {data.status}</p>
+      {
+        data.map((items, index) =>{
+          return (
+            <div key={index}>
+              <p><strong>Name:</strong> {items.name}</p>
+              <p><strong>Description:</strong> {items.description}</p>
+              <p><strong>Value:</strong> {items.value}</p>
+              <p><strong>Timestamp:</strong> {items.timestamp}</p>
+              <p><strong>Status:</strong> {items.status}</p>
+            </div>
+          );
+        })
+      }
       <p><br /></p>
     </div>
   );

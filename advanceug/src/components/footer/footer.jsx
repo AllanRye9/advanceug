@@ -30,7 +30,7 @@ export default function Footer() {
           <ul className="space-y-1 text-sm text-gray-300">
             <li><a href="#" className="hover:underline">PLE Papers</a></li>
             <li><a href="#" className="hover:underline">UCE Papers</a></li>
-            <li><a href="#" className="hover:underline">UACE Materials</a></li>
+            <li><a href="/uace" className="hover:underline">UACE Papers</a></li>
             <li><a href="#" className="hover:underline">Tutorials</a></li>
           </ul>
         </div>

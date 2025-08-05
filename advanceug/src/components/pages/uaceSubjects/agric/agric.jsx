@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import AgricContent2  from "./agricContent2";
+import AgricContent3  from "./agricContent3";
 
 export default function Agric() {
   const navigate = useNavigate();
-  const [showPopup, setShowPopup] = useState(false);
 
   const papers = {
     name: "Agric",
@@ -11,14 +12,17 @@ export default function Agric() {
   };
 
   const handleNavigation = (paperNumber) => {
-    setShowPopup(false); // Close popup
+    console.log(`Navigating to Agric Paper ${paperNumber}`);
     if (paperNumber === 1) {
-      navigate("/agricContent");
-    } else if (paperNumber === 2) {
-      navigate("/agricContent2");
-    } else if (paperNumber === 3) {
-      navigate("/agricContent3");
-    } else {
+      navigate("/AgricContent");
+    } 
+    else if (paperNumber === 2) {
+      navigate("/AgricContent2");
+    }
+    else if (paperNumber === 3) {
+      navigate("/AgricContent3");
+    }
+    else {
       navigate("/noPage");
     }
   };
@@ -30,7 +34,6 @@ export default function Agric() {
           <div className="bg-white rounded-lg shadow-lg p-6 w-80">
             <h2 className="text-xl font-bold mb-4 text-center">Select Paper</h2>
             <div className="flex flex-col space-y-3">
-              {() => showPopup === false ? setShowPopup(true) : null}
               {papers.paper.map((paperNum) => (
                 <button
                   key={paperNum}
@@ -43,7 +46,7 @@ export default function Agric() {
             </div>
             <button
               onClick={() =>{
-                setShowPopup(false) || navigate("/uace") || navigate("/");
+                navigate("/uace") || navigate("/");
               }}
               className="mt-6 w-full bg-gray-400 hover:bg-gray-600 text-white py-2 rounded"
             >

@@ -15,7 +15,7 @@ export default function PleButton() {
     <div className="max-w-xs rounded-lg overflow-hidden shadow-md bg-white hover:scale-115 transition-transform duration-200">
       <img className="w-full h-32 object-cover" src="/PLE.ico" alt="Card image" />
       <div className="px-4 py-3">
-        <div className="font-semibold text-lg mb-1">PLE page</div>
+        <div className="flex items-center justify-center font-semibold text-lg mb-1">PLE</div>
         <p className="text-gray-600 text-sm">
           Navigate to this page to find all the past papers and resources for PLE exams.
         </p>

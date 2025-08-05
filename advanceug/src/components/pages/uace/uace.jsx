@@ -30,12 +30,12 @@ export default function Uace() {
   };
 
   return (
-    <div className="overflow-x-auto p-4">
-      <table className="min-w-full border-collapse border border-gray-300 shadow-md text-left text-sm">
+    <>
+    <div className="flex items-center justify-center overflow-x-auto p-4">
+      <table className="border-collapse border border-gray-300 shadow-md text-left text-sm">
         <thead className="bg-gray-200 text-gray-700">
           <tr>
             <th className="p-3 border">Subjects</th>
-            <th className="p-3 border">Revision</th>
             <th className="p-3 border">Past Papers</th>
             <th className="p-3 border">Notes</th>
           </tr>
@@ -43,31 +43,26 @@ export default function Uace() {
         <tbody>
           <tr>
             <td className="p-3 border">Agriculture</td>
-            <td className="p-3 border">Revision notes, study groups</td>
             <td onClick={() => handleClick('Agric')} className="p-3 border cursor-pointer hover:bg-green-400">Click here</td>
             <td className="p-3 border">Class notes, online articles</td>
           </tr>
           <tr >
             <td className="p-3 border">Economics</td>
-            <td className="p-3 border">Key concepts, graphs</td>
             <td onClick={() => handleClick('Econ')} className="p-3 border cursor-pointer hover:bg-blue-400">Click here</td>
             <td className="p-3 border">Lectures, guides</td>
           </tr>
           <tr>
             <td className="p-3 border">Geography</td>
-            <td className="p-3 border">Fieldwork notes</td>
             <td onClick={() => handleClick('Geog')} className="p-3 border cursor-pointer hover:bg-yellow-400">Click here</td>
             <td className="p-3 border">Maps, case studies</td>
           </tr>
           <tr>
             <td className="p-3 border">General Paper</td>
-            <td className="p-3 border">Essay structures</td>
             <td  onClick={() => handleClick('Gp')} className=" p-3 border cursor-pointer hover:bg-red-400">Click here</td>
             <td className="p-3 border">Article summaries</td>
           </tr>
           <tr>
             <td className="p-3 border">Sub Math</td>
-            <td className="p-3 border">Formulas, theorems</td>
             <td onClick={() => handleClick('SubMath')} className=" p-3 border cursor-pointer hover:bg-purple-400">Click here</td>
             <td className="p-3 border">Reference sheets</td>
           </tr>
@@ -78,5 +73,7 @@ export default function Uace() {
         {renderComponent()}
       </div>
     </div>
+      <div><br /> </div>
+    </>
   );
 }

@@ -22,7 +22,7 @@ export default function UaceButton() {
             <div className="max-w-xs rounded-lg overflow-hidden shadow-md bg-white hover:scale-115 transition-transform duration-200">
                 <img className="w-full h-32 object-cover" src="/UACE.ico" alt="Card image" />
                 <div className="px-4 py-3">
-                    <div className="font-semibold text-lg mb-1">UACE page</div>
+                    <div className="flex items-center justify-center font-semibold text-lg mb-1">UACE</div>
                     <p className="text-gray-600 text-sm">
                         Navigate to this page to find all the past papers and resources for UACE exams.
                     </p>

@@ -16,7 +16,7 @@ export default function OthersButton() {
         <div className="m-6 max-w-xs rounded-lg overflow-hidden shadow-md bg-white hover:scale-115 transition-transform duration-200">
             <img className="w-full h-32 object-cover" src="/PLE.ico" alt="Card image" />
             <div className="px-4 py-3">
-                <div className="font-semibold text-lg mb-1">Resources</div>
+                <div className="flex items-center justify-center font-semibold text-lg mb-1">Resources</div>
                 <p className="text-gray-600 text-sm">
                     Compilation of all resources required for your studies
                 </p>

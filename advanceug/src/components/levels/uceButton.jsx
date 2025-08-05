@@ -20,7 +20,7 @@ export default function UceButton() {
                     alt="Card image"
                 />
                 <div className="px-4 py-3">
-                    <div className="font-semibold text-lg mb-1">UCE page</div>
+                    <div className="flex items-center justify-center font-semibold text-lg mb-1">UCE</div>
                     <p className="text-gray-600 text-sm">
                         Navigate to this page to find all the past papers and resources for UCE exams.
                     </p>

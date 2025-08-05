@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 
-async function fetchAgricData() {
+async function fetchAgricData2() {
   try {
     const resp = await fetch("https://advanceug.onrender.com/api/paper2");
     if (!resp.ok) {
@@ -15,12 +15,12 @@ async function fetchAgricData() {
   }
 }
 
-export default function AgricContent() {
+export default function AgricContent2() {
   const [data, setData] = useState(null);
   const [errData, setErrData] = useState(null);
 
   useEffect(() => {
-    fetchAgricData()
+    fetchAgricData2()
       .then((response) => {
         console.log(response);
         if (response) {
@@ -40,19 +40,24 @@ export default function AgricContent() {
     return <div>{errData}</div>;
   }
 
-
   if (!data) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
-      <h1>Agriculture</h1>
-      <p><strong>Name:</strong> {data.name}</p>
-      <p><strong>Description:</strong> {data.description}</p>
-      <p><strong>Value:</strong> {data.value}</p>
-      <p><strong>Timestamp:</strong> {data.timestamp}</p>
-      <p><strong>Status:</strong> {data.status}</p>
+      <h1>Agriculture Paper 2</h1>
+      {
+        data.map((items, key) => (
+          <div key={key}>
+            <p><strong>Name:</strong> {items.name}</p>
+            <p><strong>Description:</strong> {items.description}</p>
+            <p><strong>Value:</strong> {items.value}</p>
+            <p><strong>Timestamp:</strong> {items.timestamp}</p>
+            <p><strong>Status:</strong> {items.status}</p>
+          </div>
+        ))
+      }
       <p><br /></p>
     </div>
   );
