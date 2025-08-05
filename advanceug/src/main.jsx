@@ -11,6 +11,9 @@ import OrganizeContent from './components/arrangeLevels/arrangeLevels.jsx'
 import Uace from './components/pages/uace/uace.jsx'
 import NoPage from './components/pages/noPage/noPage.jsx'
 import About from './components/pages/about/about.jsx'
+import Agric from './components/pages/uaceSubjects/agric/agric.jsx'
+import AgricContent from './components/pages/uaceSubjects/agric/agricContent.jsx'
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -22,6 +25,9 @@ createRoot(document.getElementById('root')).render(
           <Route path='/' element={<OrganizeContent />} />
           <Route path="/uace" element={<Uace />} />
           <Route path="/about" element={<About />} />
+          <Route path="/agricContent" element={<AgricContent />} />
+          <Route path="/agricContent2" element={<AgricContent />} />
+          <Route path="/agricContent3" element={<AgricContent />} />
           <Route path="*" element={<NoPage />} />
         </Routes>
       <Footer />

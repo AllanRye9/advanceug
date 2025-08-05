@@ -1,9 +1,9 @@
 import React from "react";
-import Agric from '../pages/uaceSubjects/agric.jsx'
-import Econ from '../pages/uaceSubjects/econ.jsx'
-import Gp from '../pages/uaceSubjects/gp.jsx'
-import SubMath from '../pages/uaceSubjects/subMath.jsx'
-import Geog from '../pages/uaceSubjects/geog.jsx'
+import Agric from '../pages/uaceSubjects/agric/agric.jsx'
+import Econ from '../pages/uaceSubjects/econ/econ.jsx'
+import Gp from '../pages/uaceSubjects/gp/gp.jsx'
+import SubMath from '../pages/uaceSubjects/subMath/subMath.jsx'
+import Geog from '../pages/uaceSubjects/geog/geog.jsx'
 import { useNavigate } from 'react-router-dom';
 
 

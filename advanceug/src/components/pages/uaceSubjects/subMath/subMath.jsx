@@ -1,9 +1,9 @@
 import React from "react";
 
-export default function Econ(){
+export default function SubMath(){
     return (
         <div>
-            hello the return for Econ.
+            Sub Mathematics
         </div>
     );
 }

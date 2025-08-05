@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 async function fetchAgricData() {
   try {
-    const resp = await fetch("https://advanceug.onrender.com/api/data");
+    const resp = await fetch("https://advanceug.onrender.com/api/paper3");
     if (!resp.ok) {
       throw new Error(`HTTP error! status: ${resp.status}`);
     }
@@ -15,7 +15,7 @@ async function fetchAgricData() {
   }
 }
 
-export default function Agric() {
+export default function AgricContent() {
   const [data, setData] = useState(null);
   const [errData, setErrData] = useState(null);
 

@@ -1,9 +1,9 @@
 import React from "react";
 
-export default function SubMath(){
+export default function Gp(){
     return (
         <div>
-            hello the return for SubMath.
+            General Paper
         </div>
     );
 }

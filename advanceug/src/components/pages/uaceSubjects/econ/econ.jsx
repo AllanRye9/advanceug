@@ -1,9 +1,9 @@
 import React from "react";
 
-export default function Gp(){
+export default function Econ(){
     return (
         <div>
-            hello the return for Gp.
+            Economics
         </div>
     );
 }
