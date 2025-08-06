@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import SideNav from "../sideNav/sideNav";
 
 async function fetchAgricData() {
   try {
@@ -32,24 +33,7 @@ export default function DashBoard({ year }) {
 
   return (
     <div>
-      <h1 className="text-xl font-bold">📊 Dashboard for {year}</h1>
-      <div style={{ marginTop: "20px" }}>
-        {data.map((item, idx) => (
-          <div key={idx} style={{
-            marginBottom: "20px",
-            padding: "10px",
-            backgroundColor: "#fff",
-            borderRadius: "6px",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.1)"
-          }}>
-            <p><strong>Name:</strong> {item.name}</p>
-            <p><strong>Description:</strong> {item.description}</p>
-            <p><strong>Value:</strong> {item.value}</p>
-            <p><strong>Status:</strong> {item.status}</p>
-            <p><strong>Timestamp:</strong> {item.timestamp}</p>
-          </div>
-        ))}
-      </div>
+      {data.paper1 || null}
     </div>
   );
 }

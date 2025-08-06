@@ -68,7 +68,7 @@ app.get('/api/:year', (req, res) => {
   const yearInt = parseInt(year, 10);
 
   if (yearInt >= 2000 && yearInt <= 2024) {
-    res.status(200).json({ message: `You requested data for year ${year}` });
+    yearInt === 2000 ? res.status(200).sendFile('' + __dirname + '/paper1/Agriculture-paper-1-2000.html') : res.status(200).json({ message: `You requested data for year ${year}` });
   } else {
     res.status(404).json({ error: 'Year not supported. Valid range is 2000–2024.' });
   }
