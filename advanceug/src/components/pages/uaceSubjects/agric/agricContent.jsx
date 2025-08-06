@@ -1,15 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import SideNav from "../sideNav/sideNav";
 import DashBoard from "../dashboard/dashboard";
 
 export default function AgricContent() {
-  const [selectedYear, setSelectedYear] = useState("2024");
+  const [selectedYear, setSelectedYear] = useState("2000");
+  const [dataError, setDataError] = useState(null);
+
+  const handleYearSelect = useCallback((year) => {
+    setSelectedYear(year);
+    setDataError(null);
+  }, []);
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <SideNav onYearSelect={setSelectedYear} />
-      <div style={{ flex: 1, padding: "20px", backgroundColor: "#f4f4f4" }}>
-        <DashBoard year={selectedYear} />
+    <div className="flex flex-col min-h-screen">
+      <div className="flex flex-1 overflow-hidden">
+        <SideNav 
+          onYearSelect={handleYearSelect} 
+          selectedYear={selectedYear}
+        />
+        <div className="flex-1 flex flex-col overflow-auto">
+          <DashBoard 
+            year={selectedYear} 
+            onError={setDataError}
+            error={dataError}
+          />
+        </div>
       </div>
     </div>
   );

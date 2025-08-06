@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 async function fetchAgricData2() {
   try {
-    const resp = await fetch("https://advanceug.onrender.com/api/paper2");
+    const resp = await fetch("http://127.0.0.1:8099/api/paper2");
     if (!resp.ok) {
       throw new Error(`HTTP error! status: ${resp.status}`);
     }

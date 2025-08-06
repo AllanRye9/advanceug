@@ -1,39 +1,593 @@
-import React, { useEffect, useState } from "react";
-import SideNav from "../sideNav/sideNav";
+import React, { useEffect, useState, useRef } from "react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable"; // Correct import
 
-async function fetchAgricData() {
+async function fetchAgricData(year) {
   try {
-    const resp = await fetch(`https://advanceug.onrender.com/api/paper1`);
-    if (!resp.ok) throw new Error(`HTTP error! status: ${resp.status}`);
-    return await resp.json();
+    const resp = await fetch(`http://127.0.0.1:8099/api/${year}`);
+    if (!resp.ok) {
+      throw new Error(`HTTP error! status: ${resp.status}`);
+    }
+    const data = await resp.json();
+    
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid data format received');
+    }
+    
+    return data;
   } catch (err) {
     console.error("Error fetching data:", err);
-    return null;
+    throw err;
   }
 }
 
-export default function DashBoard({ year }) {
+export default function DashBoard({ year, onError, error }) {
   const [data, setData] = useState(null);
-  const [err, setErr] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFullContent, setShowFullContent] = useState(false);
+  const contentRef = useRef(null);
 
   useEffect(() => {
-    fetchAgricData(year).then((response) => {
-      if (response) {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchAgricData(year);
         setData(response);
-        setErr(null);
-      } else {
-        setErr("Failed to load data.");
+        onError(null);
+      } catch (err) {
+        const errorMsg = err.message || 'Failed to load data';
+        onError(errorMsg);
         setData(null);
+      } finally {
+        setIsLoading(false);
       }
-    });
-  }, [year]);
+    };
 
-  if (err) return <div style={{ color: "red" }}>{err}</div>;
-  if (!data) return <div>Loading data for {year}...</div>;
+    if (year) {
+      loadData();
+    }
+  }, [year, onError]);
+
+  const generatePDF = () => {
+    if (!data?.exam) return;
+  
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width - 30;
+    const margin = 15;
+    let yPosition = 20;
+    const lineHeight = 7;
+    const sectionGap = 10;
+  
+    // Add title
+    doc.setFontSize(18);
+    doc.text(`${data.exam.title} - ${year}`, margin, yPosition);
+    yPosition += 20;
+  
+    data.exam.sections?.forEach(section => {
+      // Check for page break before each section
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 20;
+      }
+  
+      // Section header
+      doc.setFontSize(14);
+      const sectionTitle = `${section.name}${section.marks ? ` (${section.marks} marks)` : ''}`;
+      doc.text(sectionTitle, margin, yPosition);
+      yPosition += lineHeight + 5;
+  
+      // Section instructions
+      if (section.instructions) {
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'italic');
+        const instructions = doc.splitTextToSize(section.instructions, pageWidth);
+        doc.text(instructions, margin, yPosition);
+        yPosition += (instructions.length * lineHeight) + sectionGap;
+        doc.setFont(undefined, 'normal');
+      }
+  
+      // Process questions
+      section.questions?.forEach(question => {
+        // Check for page break before each question
+        if (yPosition > 270) {
+          doc.addPage();
+          yPosition = 20;
+        }
+  
+        // Handle questions with parts (like question 35)
+        if (question.parts) {
+          // Main question text if exists
+          if (question.text) {
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            const qText = doc.splitTextToSize(`${question.number}. ${question.text}`, pageWidth);
+            doc.text(qText, margin, yPosition);
+            yPosition += (qText.length * lineHeight) + 5;
+            doc.setFont(undefined, 'normal');
+          }
+  
+          // Process each part
+          question.parts.forEach(part => {
+            if (yPosition > 270) {
+              doc.addPage();
+              yPosition = 20;
+            }
+  
+            // Part header (e.g., "35(a)")
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            const partHeader = `${question.number}(${part.letter}) ${part.text}`;
+            const partHeaderLines = doc.splitTextToSize(partHeader, pageWidth);
+            doc.text(partHeaderLines, margin, yPosition);
+            yPosition += (partHeaderLines.length * lineHeight) + 3;
+            doc.setFont(undefined, 'normal');
+  
+            // Handle sub-parts (e.g., "35(a)(i)")
+            if (part.parts) {
+              part.parts.forEach(subPart => {
+                if (yPosition > 270) {
+                  doc.addPage();
+                  yPosition = 20;
+                }
+  
+                // Sub-part header
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                const subPartHeader = `${question.number}(${part.letter})(${subPart.number}) ${subPart.text}`;
+                doc.text(subPartHeader, margin + 5, yPosition);
+                yPosition += lineHeight;
+                doc.setFont(undefined, 'normal');
+  
+                // Sub-part answer
+                if (Array.isArray(subPart.answer)) {
+                  subPart.answer.forEach(answer => {
+                    if (yPosition > 280) {
+                      doc.addPage();
+                      yPosition = 20;
+                    }
+                    const answerText = typeof answer === 'object' ? 
+                      `${answer.term}: ${answer.definition}` : 
+                      answer;
+                    const lines = doc.splitTextToSize(`- ${answerText}`, pageWidth - 10);
+                    doc.text(lines, margin + 10, yPosition);
+                    yPosition += (lines.length * lineHeight);
+                  });
+                }
+                yPosition += 5;
+              });
+            } else {
+              // Part answer if no sub-parts
+              if (Array.isArray(part.answer)) {
+                part.answer.forEach(answer => {
+                  if (yPosition > 280) {
+                    doc.addPage();
+                    yPosition = 20;
+                  }
+                  const answerText = typeof answer === 'object' ? 
+                    `${answer.term}: ${answer.definition}` : 
+                    answer;
+                  const lines = doc.splitTextToSize(`- ${answerText}`, pageWidth - 10);
+                  doc.text(lines, margin + 10, yPosition);
+                  yPosition += (lines.length * lineHeight);
+                });
+              } else if (typeof part.answer === 'object' && part.answer !== null) {
+                // Handle object answers
+                Object.entries(part.answer).forEach(([key, value]) => {
+                  if (yPosition > 280) {
+                    doc.addPage();
+                    yPosition = 20;
+                  }
+                  doc.setFont(undefined, 'bold');
+                  doc.text(`${key}:`, margin + 10, yPosition);
+                  yPosition += lineHeight;
+                  doc.setFont(undefined, 'normal');
+                  
+                  if (Array.isArray(value)) {
+                    value.forEach(item => {
+                      const lines = doc.splitTextToSize(`- ${item}`, pageWidth - 15);
+                      doc.text(lines, margin + 15, yPosition);
+                      yPosition += (lines.length * lineHeight);
+                    });
+                  }
+                });
+              }
+              yPosition += 5;
+            }
+          });
+        } else {
+          // Regular question without parts
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'bold');
+          const qHeader = `Q${question.number}. ${question.text}`;
+          const qHeaderLines = doc.splitTextToSize(qHeader, pageWidth);
+          doc.text(qHeaderLines, margin, yPosition);
+          yPosition += (qHeaderLines.length * lineHeight);
+          doc.setFont(undefined, 'normal');
+  
+          // Options
+          if (question.options) {
+            question.options.forEach(option => {
+              if (yPosition > 280) {
+                doc.addPage();
+                yPosition = 20;
+              }
+              doc.text(option, margin + 10, yPosition);
+              yPosition += lineHeight;
+            });
+          }
+  
+          // Answer
+          if (yPosition > 280) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(39, 174, 96); // Green color
+          doc.text(`Answer: ${question.answer}`, margin, yPosition);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(0, 0, 0); // Black color
+          yPosition += lineHeight;
+  
+          // Comment
+          if (question.comment) {
+            if (yPosition > 280) {
+              doc.addPage();
+              yPosition = 20;
+            }
+            doc.setFont(undefined, 'italic');
+            doc.setTextColor(127, 140, 141); // Gray color
+            const commentLines = doc.splitTextToSize(`Comment: ${question.comment}`, pageWidth);
+            doc.text(commentLines, margin, yPosition);
+            yPosition += (commentLines.length * lineHeight);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0); // Black color
+          }
+  
+          yPosition += sectionGap;
+        }
+      });
+    });
+  
+    // Footer content if exists
+    if (data.exam.footer) {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'italic');
+      const footerLines = doc.splitTextToSize(data.exam.footer.content, pageWidth);
+      doc.text(footerLines, margin, yPosition);
+    }
+  
+    doc.save(`${data.exam.title.replace(/\s+/g, '-')}-${year}.pdf`);
+  };
+
+  const toggleContent = () => {
+    setShowFullContent(!showFullContent);
+  };
+
+  const renderAnswer = (answer) => {
+    if (typeof answer === 'string') {
+      return answer;
+    }
+    if (Array.isArray(answer)) {
+      return (
+        <ul style={{ listStyleType: 'none', paddingLeft: '20px' }}>
+          {answer.map((item, index) => (
+            <li key={index} style={{ marginBottom: '5px' }}>
+              - {renderAnswer(item)}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    if (typeof answer === 'object' && answer !== null) {
+      if (answer.term && answer.definition) {
+        return (
+          <div>
+            <strong>{answer.term}:</strong> {answer.definition}
+          </div>
+        );
+      }
+      return (
+        <div>
+          {Object.entries(answer).map(([key, value]) => (
+            <div key={key} style={{ marginBottom: '10px' }}>
+              <div style={{ fontWeight: 'bold' }}>{key}:</div>
+              {renderAnswer(value)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return JSON.stringify(answer);
+  };
+
+  const renderSectionContent = (section) => {
+    return (
+      <div key={section.name} style={{ marginBottom: '30px' }}>
+        <h3 style={{ 
+          color: '#2c3e50',
+          borderBottom: '3px solid #eee',
+          paddingBottom: '8px'
+        }}>
+          {section.name} {section.marks && `(${section.marks} marks)`}
+        </h3>
+        
+        {section.instructions && (
+          <p style={{ fontStyle: 'italic', marginBottom: '15px' }}>
+            {section.instructions}
+          </p>
+        )}
+        
+        {/* Handle regular questions */}
+        {section.questions?.map((question, qIndex) => (
+          <div key={qIndex}>
+            {/* Render question with parts if it has parts */}
+            {question.parts ? (
+              <div style={{ 
+                marginBottom: '20px',
+                padding: '15px',
+                backgroundColor: '#f0f7ff',
+                borderRadius: '5px'
+              }}>
+                {/* Main question text if exists */}
+                {question.text && (
+                  <div style={{ fontWeight: 'bold', marginBottom: '15px' }}>
+                    {question.number}. {question.text}
+                  </div>
+                )}
+                
+                {/* Render each part */}
+                {question.parts.map((part, partIndex) => (
+                  <div key={`${question.number}-${part.letter}`} style={{ 
+                    marginBottom: '15px',
+                    padding: '10px',
+                    backgroundColor: '#f9f9f9',
+                    borderRadius: '3px'
+                  }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                      {question.number}({part.letter}) {part.text}
+                    </div>
+                    
+                    {/* Handle parts that have sub-parts */}
+                    {part.parts ? (
+                      part.parts.map((subPart, subIndex) => (
+                        <div key={subIndex} style={{ marginBottom: '10px' }}>
+                          <div style={{ fontWeight: 'bold' }}>
+                            {question.number}({part.letter})({subPart.number}) {subPart.text}
+                          </div>
+                          {renderAnswer(subPart.answer)}
+                        </div>
+                      ))
+                    ) : (
+                      renderAnswer(part.answer)
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              /* Render regular question without parts */
+              <div key={qIndex} style={{ 
+                marginBottom: '20px',
+                padding: '15px',
+                backgroundColor: '#f9f9f9',
+                borderRadius: '5px'
+              }}>
+                <div style={{ display: 'flex', marginBottom: '10px' }}>
+                  <span style={{ 
+                    fontWeight: 'bold',
+                    marginRight: '10px',
+                    color: '#e74c3c'
+                  }}>
+                    Q{question.number}.
+                  </span>
+                  <span>{question.text}</span>
+                </div>
+                
+                {question.options?.map((option, optIndex) => (
+                  <div key={optIndex} style={{ 
+                    marginLeft: '25px',
+                    marginRight: '25px',
+                    marginBottom: '5px'
+                  }}>
+                    {option}
+                  </div>
+                ))}
+                
+                <div style={{ 
+                  fontWeight: 'bold',
+                  color: '#27ae60',
+                  marginTop: '10px'
+                }}>
+                  Answer: {question.answer}
+                </div>
+                
+                {question.comment && (
+                  <div style={{ 
+                    fontStyle: 'italic',
+                    color: '#7f8c8d',
+                    marginTop: '5px'
+                  }}>
+                    {question.comment}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+        
+        {Array.isArray(section.content) && section.content.length > 0 && (
+          <div style={{ 
+            marginTop: '20px',
+            fontStyle: 'italic',
+            color: '#7f8c8d'
+          }}>
+            {section.content.map((comment, commentIndex) => (
+              <div key={commentIndex}>{comment}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (error) {
+    return (
+      <div style={{ 
+        flex: 1, 
+        padding: "20px", 
+        backgroundColor: "#f4f4f4",
+        color: "red",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        Error: {error}
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{ 
+        flex: 1, 
+        padding: "20px", 
+        backgroundColor: "#f4f4f4",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        Loading data for {year}...
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div style={{ 
+        flex: 1, 
+        padding: "20px", 
+        backgroundColor: "#f4f4f4",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        No data available for {year}
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {data.paper1 || null}
+    <div style={{ 
+      flex: 1, 
+      padding: "20px", 
+      backgroundColor: "#f4f4f4",
+      position: 'relative'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '20px'
+      }}>
+        <h2>{data.exam?.title || 'Agricultural Exam Data'} - {year}</h2>
+        <button
+    
+          onClick={generatePDF}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Download PDF
+        </button>
+      </div>
+
+      <div
+        ref={contentRef}
+        style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          maxHeight: showFullContent ? 'none' : '1100px',
+          overflow: 'hidden',
+          position: 'relative'
+        }}
+      >
+        {data.exam ? (
+          <div>
+            {data.exam.sections?.map(renderSectionContent)}
+            
+            {data.exam.footer && (
+              <div style={{ 
+                marginTop: '30px',
+                padding: '15px',
+                backgroundColor: '#f5f5f5',
+                borderRadius: '5px',
+                fontStyle: 'italic'
+              }}>
+                {data.exam.footer.content}
+              </div>
+            )}
+          </div>
+        ) : (
+          <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
+            {JSON.stringify(data, null, 2)}
+          </pre>
+        )}
+
+        {!showFullContent && (
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '60px',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            paddingBottom: '10px'
+          }}>
+            <button 
+              onClick={toggleContent}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#3498db',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Show More
+            </button>
+          </div>
+        )}
+      </div>
+
+      {showFullContent && (
+        <button 
+          onClick={toggleContent}
+          style={{
+            marginTop: '10px',
+            padding: '8px 16px',
+            backgroundColor: '#3498db',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Show Less
+        </button>
+      )}
     </div>
   );
 }
