@@ -43,9 +43,8 @@ const papers = {
             timestamp: new Date().toISOString(),
             status: "active"
         }
-    ],
-    year: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
-}
+    ]
+};
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
@@ -68,7 +67,7 @@ app.get('/api/:year', (req, res) => {
   const yearInt = parseInt(year, 10);
 
   if (yearInt >= 2000 && yearInt <= 2024) {
-    yearInt === 2000 ? res.status(200).sendFile('' + __dirname + '/paper1/Agriculture-paper-1-2000.html') : res.status(200).json({ message: `You requested data for year ${year}` });
+    yearInt === 2000 ? res.status(200).sendFile('' + __dirname + '/paper1/Agriculture-paper-1-2000.text') : res.status(200).json({ message: `You requested data for year ${year}` });
   } else {
     res.status(404).json({ error: 'Year not supported. Valid range is 2000–2024.' });
   }
