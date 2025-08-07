@@ -4,8 +4,8 @@ export default function SideNav({ onYearSelect, selectedYear: propSelectedYear }
     const years = Array.from({ length: 25 }, (_, i) => 2000 + i);
     const [localSelectedYear, setLocalSelectedYear] = useState(propSelectedYear);
     const [hoveredYear, setHoveredYear] = useState(null);
-    const [isOpen, setIsOpen] = useState(window.innerWidth > 768);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [isOpen, setIsOpen] = useState(window.innerWidth <= 768);
 
     useEffect(() => {
         setLocalSelectedYear(propSelectedYear);
@@ -16,14 +16,13 @@ export default function SideNav({ onYearSelect, selectedYear: propSelectedYear }
             const mobile = window.innerWidth <= 768;
             setIsMobile(mobile);
             if (mobile) {
-                setIsOpen(false);
+                setIsOpen(true);
             } else {
                 setIsOpen(true);
             }
         };
         
         window.addEventListener("resize", handleResize);
-        handleResize();
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
@@ -37,6 +36,10 @@ export default function SideNav({ onYearSelect, selectedYear: propSelectedYear }
         }
     };
 
+    const toggleSidebar = () => {
+        setIsOpen(!isOpen);
+    };
+
     const styles = {
         sidebar: {
             width: isMobile ? (isOpen ? "250px" : "0") : "220px",
@@ -44,15 +47,26 @@ export default function SideNav({ onYearSelect, selectedYear: propSelectedYear }
             backgroundColor: "#f8f9fa",
             color: "#333",
             padding: isOpen ? "20px" : "0",
-            display: isOpen ? "flex" : "none",
+            display: "flex",
             flexDirection: "column",
-            position: isMobile ? "fixed" : "relative",
-            top: 0,
+            position: "fixed",
+            top: 10,
             left: 0,
             zIndex: 1000,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             boxShadow: isOpen ? "4px 0 15px rgba(0,0,0,0.1)" : "none",
             overflow: "hidden",
+        },
+        overlay: {
+            position: "fixed",
+            top: 10,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 999,
+            display: isMobile && isOpen ? "block" : "none",
+            transition: "opacity 0.3s ease",
         },
         button: {
             padding: "8px 4px",
@@ -72,13 +86,13 @@ export default function SideNav({ onYearSelect, selectedYear: propSelectedYear }
         toggleBtn: {
             position: "fixed",
             top: "20px",
-            left: "20px",
+            left: isOpen && isMobile ? "calc(250px + 20px)" : "20px",
             backgroundColor: "#0074D9",
             color: "#fff",
             border: "none",
             borderRadius: "50%",
             padding: "12px",
-            width: "48px",
+            width: "64px",
             height: "48px",
             zIndex: 1100,
             display: isMobile ? "flex" : "none",
@@ -88,7 +102,6 @@ export default function SideNav({ onYearSelect, selectedYear: propSelectedYear }
             justifyContent: "center",
             boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
             transition: "all 0.3s ease",
-            transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
         },
         title: {
             fontSize: "1.1rem",
@@ -117,21 +130,26 @@ export default function SideNav({ onYearSelect, selectedYear: propSelectedYear }
 
     return (
         <>
+            {/* Overlay for mobile */}
+            <div 
+                style={styles.overlay} 
+                onClick={toggleSidebar}
+                aria-hidden="true"
+            />
+
+            {/* Toggle button */}
             {isMobile && (
                 <button 
-                    onClick={() => setIsOpen(!isOpen)} 
+                    onClick={toggleSidebar} 
                     style={styles.toggleBtn}
                     aria-label={isOpen ? "Close menu" : "Open menu"}
                     aria-expanded={isOpen}
                 >
-                    {isOpen ? (
-                        <span style={{ transform: "rotate(45deg)", display: "inline-block" }}>×</span>
-                    ) : (
-                        <span>☰</span>
-                    )}
+                    {isOpen ? "×" : "☰"}
                 </button>
             )}
 
+            {/* Sidebar content */}
             <div style={styles.sidebar}>
                 <div style={styles.title}>📘 Exam Years</div>
                 <div style={styles.scrollContent}>

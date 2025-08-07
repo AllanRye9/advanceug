@@ -61,7 +61,6 @@ export default function AgricContent3() {
           );
         })
       }
-      <p><br /></p>
     </div>
   );
 }

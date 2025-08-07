@@ -12,15 +12,13 @@ export default function NavBar() {
       };
 
       menuBtn.addEventListener('click', toggleMenu);
-
-      // Cleanup to avoid memory leaks
       return () => menuBtn.removeEventListener('click', toggleMenu);
     }
   }, []);
 
   return (
     <>
-      <nav className="bg-white shadow-md m-4 ">
+      <nav className="fixed top-0 left-0 right-0 z-2000 bg-white shadow-md m-4 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Logo */}

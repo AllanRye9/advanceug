@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable"; // Correct import
 
 async function fetchAgricData(year) {
   try {
@@ -21,11 +20,22 @@ async function fetchAgricData(year) {
   }
 }
 
-export default function DashBoard({ year, onError, error }) {
+export default function DashBoard({ year, onError, error, onToggleFullScreen }) {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const contentRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -48,6 +58,22 @@ export default function DashBoard({ year, onError, error }) {
     }
   }, [year, onError]);
 
+  const toggleAnswers = () => {
+    setShowAnswers(!showAnswers);
+  };
+
+  const toggleFullScreen = () => {
+    const newFullScreenState = !isFullScreen;
+    setIsFullScreen(newFullScreenState);
+    if (onToggleFullScreen) {
+      onToggleFullScreen(newFullScreenState);
+    }
+    // When entering full screen, automatically show all content
+    if (!isFullScreen) {
+      setShowFullContent(true);
+    }
+  };
+
   const generatePDF = () => {
     if (!data?.exam) return;
   
@@ -64,19 +90,16 @@ export default function DashBoard({ year, onError, error }) {
     yPosition += 20;
   
     data.exam.sections?.forEach(section => {
-      // Check for page break before each section
       if (yPosition > 270) {
         doc.addPage();
         yPosition = 20;
       }
   
-      // Section header
       doc.setFontSize(14);
       const sectionTitle = `${section.name}${section.marks ? ` (${section.marks} marks)` : ''}`;
       doc.text(sectionTitle, margin, yPosition);
       yPosition += lineHeight + 5;
   
-      // Section instructions
       if (section.instructions) {
         doc.setFontSize(12);
         doc.setFont(undefined, 'italic');
@@ -86,17 +109,13 @@ export default function DashBoard({ year, onError, error }) {
         doc.setFont(undefined, 'normal');
       }
   
-      // Process questions
       section.questions?.forEach(question => {
-        // Check for page break before each question
         if (yPosition > 270) {
           doc.addPage();
           yPosition = 20;
         }
   
-        // Handle questions with parts (like question 35)
         if (question.parts) {
-          // Main question text if exists
           if (question.text) {
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
@@ -106,14 +125,12 @@ export default function DashBoard({ year, onError, error }) {
             doc.setFont(undefined, 'normal');
           }
   
-          // Process each part
           question.parts.forEach(part => {
             if (yPosition > 270) {
               doc.addPage();
               yPosition = 20;
             }
   
-            // Part header (e.g., "35(a)")
             doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
             const partHeader = `${question.number}(${part.letter}) ${part.text}`;
@@ -122,7 +139,6 @@ export default function DashBoard({ year, onError, error }) {
             yPosition += (partHeaderLines.length * lineHeight) + 3;
             doc.setFont(undefined, 'normal');
   
-            // Handle sub-parts (e.g., "35(a)(i)")
             if (part.parts) {
               part.parts.forEach(subPart => {
                 if (yPosition > 270) {
@@ -130,7 +146,6 @@ export default function DashBoard({ year, onError, error }) {
                   yPosition = 20;
                 }
   
-                // Sub-part header
                 doc.setFontSize(11);
                 doc.setFont(undefined, 'bold');
                 const subPartHeader = `${question.number}(${part.letter})(${subPart.number}) ${subPart.text}`;
@@ -138,8 +153,7 @@ export default function DashBoard({ year, onError, error }) {
                 yPosition += lineHeight;
                 doc.setFont(undefined, 'normal');
   
-                // Sub-part answer
-                if (Array.isArray(subPart.answer)) {
+                if (showAnswers && Array.isArray(subPart.answer)) {
                   subPart.answer.forEach(answer => {
                     if (yPosition > 280) {
                       doc.addPage();
@@ -156,8 +170,7 @@ export default function DashBoard({ year, onError, error }) {
                 yPosition += 5;
               });
             } else {
-              // Part answer if no sub-parts
-              if (Array.isArray(part.answer)) {
+              if (showAnswers && Array.isArray(part.answer)) {
                 part.answer.forEach(answer => {
                   if (yPosition > 280) {
                     doc.addPage();
@@ -170,8 +183,7 @@ export default function DashBoard({ year, onError, error }) {
                   doc.text(lines, margin + 10, yPosition);
                   yPosition += (lines.length * lineHeight);
                 });
-              } else if (typeof part.answer === 'object' && part.answer !== null) {
-                // Handle object answers
+              } else if (showAnswers && typeof part.answer === 'object' && part.answer !== null) {
                 Object.entries(part.answer).forEach(([key, value]) => {
                   if (yPosition > 280) {
                     doc.addPage();
@@ -195,7 +207,6 @@ export default function DashBoard({ year, onError, error }) {
             }
           });
         } else {
-          // Regular question without parts
           doc.setFontSize(12);
           doc.setFont(undefined, 'bold');
           const qHeader = `Q${question.number}. ${question.text}`;
@@ -204,7 +215,6 @@ export default function DashBoard({ year, onError, error }) {
           yPosition += (qHeaderLines.length * lineHeight);
           doc.setFont(undefined, 'normal');
   
-          // Options
           if (question.options) {
             question.options.forEach(option => {
               if (yPosition > 280) {
@@ -216,39 +226,24 @@ export default function DashBoard({ year, onError, error }) {
             });
           }
   
-          // Answer
-          if (yPosition > 280) {
-            doc.addPage();
-            yPosition = 20;
-          }
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(39, 174, 96); // Green color
-          doc.text(`Answer: ${question.answer}`, margin, yPosition);
-          doc.setFont(undefined, 'normal');
-          doc.setTextColor(0, 0, 0); // Black color
-          yPosition += lineHeight;
-  
-          // Comment
-          if (question.comment) {
+          if (showAnswers) {
             if (yPosition > 280) {
               doc.addPage();
               yPosition = 20;
             }
-            doc.setFont(undefined, 'italic');
-            doc.setTextColor(127, 140, 141); // Gray color
-            const commentLines = doc.splitTextToSize(`Comment: ${question.comment}`, pageWidth);
-            doc.text(commentLines, margin, yPosition);
-            yPosition += (commentLines.length * lineHeight);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(39, 174, 96);
+            doc.text(`Answer: ${question.answer}`, margin, yPosition);
             doc.setFont(undefined, 'normal');
-            doc.setTextColor(0, 0, 0); // Black color
+            doc.setTextColor(0, 0, 0);
+            yPosition += lineHeight;
           }
-  
+          
           yPosition += sectionGap;
         }
       });
     });
   
-    // Footer content if exists
     if (data.exam.footer) {
       if (yPosition > 270) {
         doc.addPage();
@@ -321,10 +316,8 @@ export default function DashBoard({ year, onError, error }) {
           </p>
         )}
         
-        {/* Handle regular questions */}
         {section.questions?.map((question, qIndex) => (
           <div key={qIndex}>
-            {/* Render question with parts if it has parts */}
             {question.parts ? (
               <div style={{ 
                 marginBottom: '20px',
@@ -332,15 +325,13 @@ export default function DashBoard({ year, onError, error }) {
                 backgroundColor: '#f0f7ff',
                 borderRadius: '5px'
               }}>
-                {/* Main question text if exists */}
                 {question.text && (
                   <div style={{ fontWeight: 'bold', marginBottom: '15px' }}>
                     {question.number}. {question.text}
                   </div>
                 )}
                 
-                {/* Render each part */}
-                {question.parts.map((part, partIndex) => (
+                {question.parts.map((part) => (
                   <div key={`${question.number}-${part.letter}`} style={{ 
                     marginBottom: '15px',
                     padding: '10px',
@@ -351,24 +342,22 @@ export default function DashBoard({ year, onError, error }) {
                       {question.number}({part.letter}) {part.text}
                     </div>
                     
-                    {/* Handle parts that have sub-parts */}
                     {part.parts ? (
                       part.parts.map((subPart, subIndex) => (
                         <div key={subIndex} style={{ marginBottom: '10px' }}>
                           <div style={{ fontWeight: 'bold' }}>
                             {question.number}({part.letter})({subPart.number}) {subPart.text}
                           </div>
-                          {renderAnswer(subPart.answer)}
+                          {showAnswers && renderAnswer(subPart.answer)}
                         </div>
                       ))
                     ) : (
-                      renderAnswer(part.answer)
+                      showAnswers && renderAnswer(part.answer)
                     )}
                   </div>
                 ))}
               </div>
             ) : (
-              /* Render regular question without parts */
               <div key={qIndex} style={{ 
                 marginBottom: '20px',
                 padding: '15px',
@@ -396,22 +385,26 @@ export default function DashBoard({ year, onError, error }) {
                   </div>
                 ))}
                 
-                <div style={{ 
-                  fontWeight: 'bold',
-                  color: '#27ae60',
-                  marginTop: '10px'
-                }}>
-                  Answer: {question.answer}
-                </div>
-                
-                {question.comment && (
-                  <div style={{ 
-                    fontStyle: 'italic',
-                    color: '#7f8c8d',
-                    marginTop: '5px'
-                  }}>
-                    {question.comment}
-                  </div>
+                {showAnswers && (
+                  <>
+                    <div style={{ 
+                      fontWeight: 'bold',
+                      color: '#27ae60',
+                      marginTop: '10px'
+                    }}>
+                      Answer: {question.answer}
+                    </div>
+                    
+                    {question.comment && (
+                      <div style={{ 
+                        fontStyle: 'italic',
+                        color: '#7f8c8d',
+                        marginTop: '5px'
+                      }}>
+                        {question.comment}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -482,30 +475,64 @@ export default function DashBoard({ year, onError, error }) {
   return (
     <div style={{ 
       flex: 1, 
-      padding: "20px", 
+      padding: isMobile && !isFullScreen ? "10px" : "20px",
       backgroundColor: "#f4f4f4",
       position: 'relative'
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        marginBottom: '20px'
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        gap: '10px'
       }}>
-        <h2>{data.exam?.title || 'Agricultural Exam Data'} - {year}</h2>
-        <button
-    
-          onClick={generatePDF}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Download PDF
-        </button>
+        <h2 style={{ margin: 0 }}>{data.exam?.title || 'Agricultural Exam Data'} - {year}</h2>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            onClick={toggleAnswers}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: showAnswers ? '#e67e22' : '#3498db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {showAnswers ? 'Hide Answers' : 'Show Answers'}
+          </button>
+          
+          <button
+            onClick={generatePDF}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            Download PDF
+          </button>
+
+          <button
+            onClick={toggleFullScreen}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: isFullScreen ? '#9b59b6' : '#34495e',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+          </button>
+        </div>
       </div>
 
       <div
@@ -515,8 +542,8 @@ export default function DashBoard({ year, onError, error }) {
           padding: '20px',
           borderRadius: '8px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          maxHeight: showFullContent ? 'none' : '1100px',
-          overflow: 'hidden',
+          maxHeight: isFullScreen || showFullContent ? 'none' : '1100px',
+          overflow: isFullScreen ? 'visible' : 'hidden',
           position: 'relative'
         }}
       >
@@ -542,7 +569,7 @@ export default function DashBoard({ year, onError, error }) {
           </pre>
         )}
 
-        {!showFullContent && (
+        {!isFullScreen && !showFullContent && (
           <div style={{
             position: 'absolute',
             bottom: 0,
@@ -553,7 +580,7 @@ export default function DashBoard({ year, onError, error }) {
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            paddingBottom: '10px'
+            paddingBottom: '10px',
           }}>
             <button 
               onClick={toggleContent}
@@ -572,7 +599,7 @@ export default function DashBoard({ year, onError, error }) {
         )}
       </div>
 
-      {showFullContent && (
+      {!isFullScreen && showFullContent && (
         <button 
           onClick={toggleContent}
           style={{
@@ -582,7 +609,7 @@ export default function DashBoard({ year, onError, error }) {
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           Show Less

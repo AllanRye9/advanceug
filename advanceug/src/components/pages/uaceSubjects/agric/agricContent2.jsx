@@ -58,7 +58,6 @@ export default function AgricContent2() {
           </div>
         ))
       }
-      <p><br /></p>
     </div>
   );
 }
